@@ -1,32 +1,26 @@
-import asyncio
-import logging
 import os
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+import telebot
 import yt_dlp
 
-# التوكن الخاص بك
 TOKEN = "8754840620:AAEoURGSEuxH2yG6GNZSAVWx4drkzaDrGAc"
+bot = telebot.TeleBot(TOKEN)
 
-logging.basicConfig(level=logging.INFO)
-bot = Bot(token=TOKEN)
-dp = Dispatcher()
-
-@dp.message(Command("start"))
-async def start_handler(message: types.Message):
-    await message.answer(
-        "أهلاً بك! 🤖\n"
-        "أرسل لي رابط أي فيديو من يوتيوب، إنستغرام، تيك توك، أو تويتر وسأقوم بتحميله لك."
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(
+        message,
+        "أهلاً بك! 🤖\nأرسل لي رابط أي فيديو من يوتيوب، إنستغرام، أو تيك توك وسأقوم بتحميله لك."
     )
 
-@dp.message()
-async def download_media(message: types.Message):
+@bot.message_handler(func=lambda message: True)
+def download_media(message):
     url = message.text.strip()
+    
     if not url.startswith("http://") and not url.startswith("https://"):
-        await message.answer("الرجاء إرسال رابط صحيح يبدأ بـ http أو https.")
+        bot.reply_to(message, "الرجاء إرسال رابط صحيح يبدأ بـ http أو https.")
         return
 
-    processing_msg = await message.answer("⏳ جاري المعالجة والتحميل، يرجى الانتظار...")
+    processing_msg = bot.reply_to(message, "⏳ جاري المعالجة والتحميل، يرجى الانتظار...")
     os.makedirs("downloads", exist_ok=True)
     
     ydl_opts = {
@@ -41,17 +35,19 @@ async def download_media(message: types.Message):
             file_path = ydl.prepare_filename(info)
 
         if os.path.exists(file_path):
-            await message.answer_video(types.FSInputFile(file_path), caption="تم التحميل بواسطة البوت ✅")
+            with open(file_path, 'rb') as video:
+                bot.send_video(message.chat.id, video, caption="تم التحميل بواسطة البوت ✅")
             os.remove(file_path)
         else:
-            await message.answer("❌ عذراً، لم أتمكن من العثور على الملف وتحميله.")
+            bot.reply_to(message, "❌ عذراً، لم أتمكن من العثور على الملف وتحميله.")
+            
     except Exception as e:
-        await message.answer("❌ حدث خطأ أثناء التحميل. تأكد من أن الرابط صالح وعام.")
+        bot.reply_to(message, "❌ حدث خطأ أثناء التحميل. تأكد من أن الرابط صالح وعام.")
+        
     finally:
-        await bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
+        try:
+            bot.delete_message(message.chat.id, processing_msg.message_id)
+        except:
+            pass
 
-async def main():
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+bot.infinity_polling()
