@@ -6,10 +6,8 @@ import yt_dlp
 TOKEN = "8754840620:AAEoURGSEuxH2yG6GNZSAVWx4drkzaDrGAc"
 bot = telebot.TeleBot(TOKEN)
 
-# معرف قناتك للاشتراك الإجباري
 CHANNEL_USERNAME = "@nooraliman1"
 
-# دالة للتحقق مما إذا كان المستخدم مشتركاً في القناة أم لا
 def check_subscription(user_id):
     try:
         member = bot.get_chat_member(CHANNEL_USERNAME, user_id)
@@ -19,7 +17,6 @@ def check_subscription(user_id):
         print(f"Error checking subscription: {e}")
     return False
 
-# رسالة طلب الاشتراك الإجباري مع الأزرار
 def send_subscription_required(message):
     markup = types.InlineKeyboardMarkup()
     channel_btn = types.InlineKeyboardButton("📢 اشترك في القناة هنا", url="https://t.me/nooraliman1")
@@ -56,7 +53,6 @@ def send_welcome(message):
         "📥 فقط أرسل رابط الفيديو أو المنشور، وسيتم تنزيله تلقائيًا بأفضل جودة متاحة."
     )
 
-# التعامل مع ضغطة زر التحقق من الاشتراك
 @bot.callback_query_handler(func=lambda call: call.data == "check_sub")
 def verify_subscription(call):
     if check_subscription(call.from_user.id):
@@ -85,12 +81,16 @@ def download_media(message):
     processing_msg = bot.reply_to(message, "⏳ جاري المعالجة والتحميل، يرجى الانتظار...")
     os.makedirs("downloads", exist_ok=True)
     
+    # إعدادات متقدمة تحاكي متصفح هاتف حقيقي لتجاوز القيود تلقائياً دون ملف كوكيز
     ydl_opts = {
         'outtmpl': 'downloads/%(id)s.%(ext)s',
         'format': 'best',
         'max_filesize': 50 * 1024 * 1024,
+        'extractor_args': {'instagram': {'max_comments': [0]}},
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
         },
     }
 
@@ -101,7 +101,6 @@ def download_media(message):
 
         if os.path.exists(file_path):
             with open(file_path, 'rb') as video:
-                # النص الإعلاني المحدث الذي يظهر تحت كل فيديو مرفق
                 caption_text = (
                     "📥 **تم التحميل بنجاح!**\n\n"
                     "✨ يمكنك تحميل الفيديوهات من على منصات التواصل الإجتماعي عبر بوت:\n"
@@ -113,7 +112,7 @@ def download_media(message):
             bot.reply_to(message, "❌ عذراً، لم أتمكن من العثور على الملف وتحميله.")
             
     except Exception as e:
-        bot.reply_to(message, "❌ حدث خطأ أثناء التحميل. تأكد من أن الرابط صالح وعام.")
+        bot.reply_to(message, "❌ عذراً، هذا الرابط خاص أو محمي بواسطة المنصة ولا يمكن تحميله مباشرة.")
         
     finally:
         try:
