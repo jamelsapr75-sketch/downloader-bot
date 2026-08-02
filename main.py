@@ -26,7 +26,7 @@ def send_subscription_required(message):
     
     bot.send_message(
         message.chat.id,
-        "⚠️ **عذراً، عليك الاشترا⁠ك في قناة البوت أولاً لتتمكن من استخدامه!**\n\n"
+        "⚠️ **عذراً، عليك الاشتراك في قناة البوت أولاً لتتمكن من استخدامه!**\n\n"
         "القناة: https://t.me/nooraliman1\n\n"
         "بعد الاشتراك، اضغط على زر (تحقق من الاشتراك) بالأسفل 👇",
         reply_markup=markup,
@@ -81,17 +81,12 @@ def download_media(message):
     processing_msg = bot.reply_to(message, "⏳ جاري المعالجة والتحميل، يرجى الانتظار...")
     os.makedirs("downloads", exist_ok=True)
     
-    # إعدادات متقدمة تحاكي متصفح هاتف حقيقي لتجاوز القيود تلقائياً دون ملف كوكيز
+    # إعدادات yt-dlp مع تفعيل ملف الكوكيز الذي رفعته للمستودع
     ydl_opts = {
         'outtmpl': 'downloads/%(id)s.%(ext)s',
         'format': 'best',
         'max_filesize': 50 * 1024 * 1024,
-        'extractor_args': {'instagram': {'max_comments': [0]}},
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-        },
+        'cookiefile': 'cookies.txt',  # تفعيل الكوكيز المستخرجة لتجاوز حظر المنصات
     }
 
     try:
@@ -112,7 +107,7 @@ def download_media(message):
             bot.reply_to(message, "❌ عذراً، لم أتمكن من العثور على الملف وتحميله.")
             
     except Exception as e:
-        bot.reply_to(message, "❌ عذراً، هذا الرابط خاص أو محمي بواسطة المنصة ولا يمكن تحميله مباشرة.")
+        bot.reply_to(message, f"❌ حدث خطأ أثناء التحميل: {str(e)}")
         
     finally:
         try:
