@@ -105,7 +105,7 @@ def download_media(message):
                 caption_text = (
                     "📥 **تم التحميل بنجاح!**\n\n"
                     "✨ يمكنك تحميل الفيديوهات من على منصات التواصل الإجتماعي عبر بوت:\n"
-                    "👉 @sm_downloader01_bot"
+                    "👉 https://t.me/sm_downloader01_bot"
                 )
                 bot.send_video(message.chat.id, video, caption=caption_text, parse_mode="Markdown")
             os.remove(file_path)
