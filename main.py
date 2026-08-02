@@ -93,12 +93,7 @@ def download_media(message):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         },
     }
-ydl_opts = {
-        'outtmpl': 'downloads/%(id)s.%(ext)s',
-        'format': 'best',
-        'max_filesize': 50 * 1024 * 1024,
-        'cookiefile': 'cookies.txt',  # تفعيل الكوكيز المستخرجة لتجاوز حظر المنصات
-}
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -127,3 +122,4 @@ ydl_opts = {
             pass
 
 bot.infinity_polling()
+
